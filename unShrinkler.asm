@@ -179,10 +179,9 @@ getlit     jsr getbit
 readlength
            lda #.hi(probs_length)
            jsr getnumber
-           clc
            lda #$ff
 _offsetL   equ *-1
-           adc _dst
+           adc _dst ; C=0
            sta _copy
            lda #$ff
 _offsetH   equ *-1
@@ -221,8 +220,8 @@ _lcopfin   jsr getkind
 readoffset
            lda #.hi(probs_offset)
            jsr getnumber
-           lda #$03 ;  C=0
-           sbc _number
+           lda #$03
+           sbc _number  ; C=0
            sta _offsetL
            tya
            sbc _number+1
