@@ -56,11 +56,11 @@ getbit     lda _d3+1
            bpl readbit
            lda (_tabs),y
            sta _Cp+1
+           lsr @
            sta _xC+1
            inc _tabs+1
            lda (_tabs),y
            sta _Cp
-           lsr _xC+1
            ror @
            lsr _xC+1
            ror @
