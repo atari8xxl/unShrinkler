@@ -147,6 +147,7 @@ shrinkler_decrunch
            lsr @
            sta _d3+1
            sta _tabs
+           sta _lit
            tay
 @          dec _tabs+1
 @          sta (_tabs),y
@@ -187,22 +188,40 @@ _offsetL   equ *-1
 _offsetH   equ *-1
            adc _dst+1
            sta _copy+1
+
            ldx _number
+           lda _number+1
+           beq _lcopS
+
 _lcop      lda (_copy),y
-           inc _copy
-           bne @+
+           sta (_dst),y
+           iny
+           bne _lcopc
            inc _copy+1
-@          sta (_dst),y
-           inc _dst
-           bne @+
            inc _dst+1
-@          txa
+_lcopc     txa
            bne @+
            dec _number+1
 @          dex
            bne _lcop
            lda _number+1
            bne _lcop
+           beq _lcopfin
+
+_lcopS     lda (_copy),y
+           sta (_dst),y
+           iny
+           dex
+           bne _lcopS
+
+_lcopfin
+           clc
+           tya
+           adc _dst
+           sta _dst
+           bcc @+
+           inc _dst+1
+@          ldy #$00
 
            jsr getkind
            bcc literal
@@ -226,3 +245,16 @@ probs        equ buffers
 probs_ref    equ buffers+$200
 probs_length equ buffers+$200
 probs_offset equ buffers+$400
+
+
+
+
+
+
+
+
+
+
+
+
+
