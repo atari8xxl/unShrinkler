@@ -68,10 +68,9 @@ getbit     lda _d3+1
            ror @
            lsr _xC+1
            ror @
-           sta _xC
-           lda _Cp
+           eor #$ff
            sec
-           sbc _xC
+           adc _Cp
            sta _xC
            lda _Cp+1
            sbc _xC+1
