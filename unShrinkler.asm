@@ -143,7 +143,10 @@ shrinkler_decrunch
            lda #.hi(buffers+$600)
            sta _tabs+1
            ldx #5
-           lda #0
+           lda #1
+           sta _d3
+           lsr @
+           sta _d3+1
            sta _tabs
            tay
 @          dec _tabs+1
@@ -153,10 +156,6 @@ shrinkler_decrunch
            eor #$80
            dex
            bpl @-1
-
-           lda #1
-           sta _d3
-           sty _d3+1
 
 literal    sec
            bcs @+
