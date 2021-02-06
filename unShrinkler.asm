@@ -9,8 +9,8 @@ _d2      .word $0000
 _xC      .word $0000
 _lit     .byte $00
 _xH      .byte $00
-_d3      .word $0001
-_tabs    .word buffers+$600
+_d3      .word $0000
+_tabs    .word $0000 buffers+$600
 
 ; unSrinkler
 
@@ -113,8 +113,7 @@ one
            sta _d3+1
 
            lda _xC+1
-           sec
-           sbc #$f0
+           sbc #$EF     ; C=0
            sta _xC+1
            lda _xC
            bne @+
@@ -141,8 +140,11 @@ _probret   lda _xC
            rts
 
 shrinkler_decrunch
+           lda #.hi(buffers+$600)
+           sta _tabs+1
            ldx #5
            lda #0
+           sta _tabs
            tay
 @          dec _tabs+1
 @          sta (_tabs),y
@@ -153,6 +155,8 @@ shrinkler_decrunch
            bpl @-1
 
            lda #1
+           sta _d3
+           sty _d3+1
 
 literal    sec
            bcs @+
@@ -208,8 +212,7 @@ _lcop      lda (_copy),y
 readoffset
            lda #.hi(probs_offset)
            jsr getnumber
-           lda #$02
-           sec
+           lda #$03 ;  C=0
            sbc _number
            sta _offsetL
            tya
