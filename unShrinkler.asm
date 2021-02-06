@@ -9,7 +9,7 @@ _d2      .word $0000
 _xC      .word $0000
 _lit     .byte $00
 _xH      .byte $00
-_d3      .word $0000
+_d3      .word $0001
 _tabs    .word buffers+$600
 
 ; unSrinkler
@@ -153,8 +153,6 @@ shrinkler_decrunch
            bpl @-1
 
            lda #1
-           sta _d3
-           sty _d3+1
 
 literal    sec
            bcs @+
