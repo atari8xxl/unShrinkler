@@ -107,17 +107,16 @@ _mulcont
            sbc _Cp+1
            bcs zero
 one
-           lda _Cp
-           sta _d3
-           lda _Cp+1
-           sta _d3+1
-
            lda _xC
            sbc #0       ; C=0
            sta _xC
            lda _xC+1
            sbc #$F0
            sta _xC+1
+
+           lda _Cp
+           sta _d3
+           lda _Cp+1
 
            sec
            bcs _probret ; zawsze
@@ -129,10 +128,10 @@ zero       sta _d2+1    ; c=1
            sta _d3
            lda _d3+1
            sbc _Cp+1
-           sta _d3+1
            clc
 
-_probret   lda _xC
+_probret   sta _d3+1
+           lda _xC
            sta (_tabs),y
            dec _tabs+1
            lda _xC+1
