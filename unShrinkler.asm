@@ -10,7 +10,7 @@ _xC      .word $0000
 _lit     .byte $00
 _xH      .byte $00
 _d3      .word $0000
-_tabs    .word $0000 buffers+$600
+_tabs    .word $0000 
 
 ; unSrinkler
 
