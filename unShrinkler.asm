@@ -226,8 +226,7 @@ readoffset
            tya
            sbc _number+1
            sta _offsetH
-           ora _offsetL
-           bne readlength
+           bcc readlength
            rts                   ; koniec
 
              .align
