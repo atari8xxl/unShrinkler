@@ -189,41 +189,33 @@ _offsetH   equ *-1
            adc _dst+1
            sta _copy+1
 
-           ldx _number
-           lda _number+1
-           beq _lcopS
-
+           ldx _number+1
+           beq _lcoplp
 _lcop      lda (_copy),y
            sta (_dst),y
            iny
-           bne _lcopc
+           bne _lcop
            inc _copy+1
            inc _dst+1
-_lcopc     txa
-           bne @+
-           dec _number+1
-@          dex
+           dex
            bne _lcop
-           lda _number+1
-           bne _lcop
-           beq _lcopfin
 
+_lcoplp    ldx _number
+           beq _lcopfin
 _lcopS     lda (_copy),y
            sta (_dst),y
            iny
            dex
            bne _lcopS
-
-_lcopfin
-           clc
            tya
+           clc
            adc _dst
            sta _dst
            bcc @+
            inc _dst+1
 @          ldy #$00
 
-           jsr getkind
+_lcopfin   jsr getkind
            bcc literal
 
 readoffset
