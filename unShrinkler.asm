@@ -112,13 +112,13 @@ one
            lda _Cp+1
            sta _d3+1
 
-           lda _xC+1
-           sbc #$EF     ; C=0
-           sta _xC+1
            lda _xC
-           bne @+
-           dec _xC+1
-@          dec _xC
+           sbc #0       ; C=0
+           sta _xC
+           lda _xC+1
+           sbc #$F0
+           sta _xC+1
+
            sec
            bcs _probret ; zawsze
 
