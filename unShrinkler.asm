@@ -46,8 +46,7 @@ readbit    asl _d3
            inc _src
            bne @+
            inc _src+1
-@          sec
-           rol @
+@          rol @        ; C=1
            sta _lit
 _rbok      rol _d2
            rol _d2+1
@@ -145,12 +144,12 @@ shrinkler_decrunch
            lsr @
            sta _d3+1
            sta _tabs
-           sta _lit
            tay
 @          stx _tabs+1
 @          sta (_tabs),y
            iny
            bne @-
+           sta _lit     ; eventually $80
            eor #$80
            dex
            cpx #.hi(buffers)
