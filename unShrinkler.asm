@@ -139,9 +139,7 @@ _probret   sta _d3+1
            rts
 
 shrinkler_decrunch
-           lda #.hi(buffers+$600)
-           sta _tabs+1
-           ldx #5
+           ldx #.hi(buffers+$500)
            lda #1
            sta _d3
            lsr @
@@ -149,13 +147,14 @@ shrinkler_decrunch
            sta _tabs
            sta _lit
            tay
-@          dec _tabs+1
+@          stx _tabs+1
 @          sta (_tabs),y
            iny
            bne @-
            eor #$80
            dex
-           bpl @-1
+           cpx #.hi(buffers)
+           bcs @-1
 
 literal    sec
            bcs @+
