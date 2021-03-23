@@ -2,14 +2,14 @@
 
 _src     .word packed_data_addr
 _dst     .word unpacked_addr
-_copy    .word $0000
+_copy
+_tabs    .word $0000
 _number  .word $0000
 _Cp      .word $0000
 _d2      .word $0000
 _lit     .byte $00
 _xH      .byte $00
 _d3      .word $0000
-_tabs    .word $0000 
 
 ; unSrinkler
 
