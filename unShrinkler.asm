@@ -6,7 +6,6 @@ _copy    .word $0000
 _number  .word $0000
 _Cp      .word $0000
 _d2      .word $0000
-_xC      .word $0000
 _lit     .byte $00
 _xH      .byte $00
 _d3      .word $0000
@@ -56,23 +55,23 @@ getbit     lda _d3+1
            lda (_tabs),y
            sta _Cp+1
            lsr @
-           sta _xC+1
+           sta _xH
            inc _tabs+1
            lda (_tabs),y
            sta _Cp
            ror @
-           lsr _xC+1
+           lsr _xH
            ror @
-           lsr _xC+1
+           lsr _xH
            ror @
-           lsr _xC+1
+           lsr _xH
            ror @
            eor #$ff
            sec
            adc _Cp
            sta (_tabs),y
            lda _Cp+1
-           sbc _xC+1
+           sbc _xH
            pha
 
            tya
