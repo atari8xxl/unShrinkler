@@ -35,7 +35,7 @@ _bitsloop  dec _tabs
 
 getkind    sty _tabs
            lda #.hi(probs)
-           sta _tabs+1
+getprob    sta _tabs+1
            bne getbit     ; zawsze
 
 readbit    asl _d3
@@ -170,8 +170,7 @@ getlit     jsr getbit
            bcc literal
 
            lda #.hi(probs_ref)
-           sta _tabs+1
-           jsr getbit
+           jsr getprob
            bcc readoffset
 
 readlength
