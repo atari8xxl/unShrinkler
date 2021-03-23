@@ -70,7 +70,7 @@ getbit     lda _d3+1
            eor #$ff
            sec
            adc _Cp
-           sta _xC
+           sta (_tabs),y
            lda _Cp+1
            sbc _xC+1
            sta _xC+1
@@ -106,9 +106,9 @@ _mulcont
            sbc _Cp+1
            bcs zero
 one
-           lda _xC
+           lda (_tabs),y
            sbc #0       ; C=0
-           sta _xC
+           sta (_tabs),y
            lda _xC+1
            sbc #$F0
            sta _xC+1
@@ -130,8 +130,6 @@ zero       sta _d2+1    ; c=1
            clc
 
 _probret   sta _d3+1
-           lda _xC
-           sta (_tabs),y
            dec _tabs+1
            lda _xC+1
            sta (_tabs),y
