@@ -152,10 +152,9 @@ shrinkler_decrunch
            cpx #.hi(buffers)
            bcs @-1
 
-literal    sec
-           bcs @+
+literal    inc _tabs    ; #1
 getlit     jsr getbit
-@          rol _tabs
+           rol _tabs
            bcc getlit
 
            lda _tabs
