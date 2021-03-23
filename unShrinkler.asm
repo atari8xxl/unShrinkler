@@ -73,7 +73,7 @@ getbit     lda _d3+1
            sta (_tabs),y
            lda _Cp+1
            sbc _xC+1
-           sta _xC+1
+           pha
 
            tya
            sty _xH
@@ -109,9 +109,9 @@ one
            lda (_tabs),y
            sbc #0       ; C=0
            sta (_tabs),y
-           lda _xC+1
+           pla
            sbc #$F0
-           sta _xC+1
+           pha
 
            lda _Cp
            sta _d3
@@ -131,7 +131,7 @@ zero       sta _d2+1    ; c=1
 
 _probret   sta _d3+1
            dec _tabs+1
-           lda _xC+1
+           pla
            sta (_tabs),y
            rts
 
