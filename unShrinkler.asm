@@ -40,6 +40,7 @@ unshrinkler_initByte
 	dex
 	cpx	#>unshrinkler_data
 	bcs	unshrinkler_initPage
+	tax
 
 unshrinkler_literal
 	ldy	#1
@@ -50,8 +51,7 @@ unshrinkler_literalBit
 	tay
 	bcc	unshrinkler_literalBit
 
-	ldy	#0
-	sta	(unshrinkler_dst),y
+	sta	(unshrinkler_dst,x)
 	inc	unshrinkler_dst
 	bne	unshrinkler_storeSamePage
 	inc	unshrinkler_dst+1
@@ -100,10 +100,8 @@ unshrinkler_copyByte
 	clc
 	adc	unshrinkler_dst
 	sta	unshrinkler_dst
-	bcc	unshrinkler_copySamePage
+	bcc	unshrinkler_copyDone
 	inc	unshrinkler_dst+1
-unshrinkler_copySamePage
-	ldy	#0
 
 unshrinkler_copyDone
 	jsr	unshrinkler_getKind
@@ -142,6 +140,7 @@ unshrinkler_getNumberBit
 	rts
 
 unshrinkler_getKind
+	ldy	#0
 	lda	#>unshrinkler_probs
 unshrinkler_getBitFrom
 	sta	unshrinkler_tabs+1
@@ -164,7 +163,6 @@ unshrinkler_gotBit
 	rol	unshrinkler_d2+1
 
 unshrinkler_getBit
-	ldx	#0
 	lda	unshrinkler_d3+1
 	bpl	unshrinkler_readBit
 	lda	(unshrinkler_tabs),y
@@ -248,4 +246,5 @@ unshrinkler_retBit
 	dec	unshrinkler_tabs+1
 	pla
 	sta	(unshrinkler_tabs),y
+	ldx	#0
 	rts
