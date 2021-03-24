@@ -13,6 +13,94 @@ _d3      .word $0000
 
 ; unSrinkler
 
+shrinkler_decrunch
+           ldx #.hi(buffers+$500)
+           lda #1
+           sta _d3
+           lsr @
+           sta _d3+1
+           sta _tabs
+           tay
+@          stx _tabs+1
+@          sta (_tabs),y
+           iny
+           bne @-
+           sta _lit     ; eventually $80
+           eor #$80
+           dex
+           cpx #.hi(buffers)
+           bcs @-1
+
+literal    inc _tabs    ; #1
+getlit     jsr getbit
+           rol _tabs
+           bcc getlit
+
+           lda _tabs
+           sta (_dst),y
+           inc _dst
+           bne @+
+           inc _dst+1
+@          jsr getkind
+           bcc literal
+
+           lda #.hi(probs_ref)
+           jsr getprob
+           bcc readoffset
+
+readlength
+           lda #.hi(probs_length)
+           jsr getnumber
+           lda #$ff
+_offsetL   equ *-1
+           adc _dst ; C=0
+           sta _copy
+           lda #$ff
+_offsetH   equ *-1
+           adc _dst+1
+           sta _copy+1
+
+           ldx _number+1
+           beq _lcoplp
+_lcop      lda (_copy),y
+           sta (_dst),y
+           iny
+           bne _lcop
+           inc _copy+1
+           inc _dst+1
+           dex
+           bne _lcop
+
+_lcoplp    ldx _number
+           beq _lcopfin
+_lcopS     lda (_copy),y
+           sta (_dst),y
+           iny
+           dex
+           bne _lcopS
+           tya
+           clc
+           adc _dst
+           sta _dst
+           bcc @+
+           inc _dst+1
+@          ldy #$00
+
+_lcopfin   jsr getkind
+           bcc literal
+
+readoffset
+           lda #.hi(probs_offset)
+           jsr getnumber
+           lda #$03
+           sbc _number  ; C=0
+           sta _offsetL
+           tya
+           sbc _number+1
+           sta _offsetH
+           bcc readlength
+           rts                   ; koniec
+
 getnumber  sta _tabs+1
 _numberloop
            inc _tabs
@@ -133,94 +221,6 @@ _probret   sta _d3+1
            pla
            sta (_tabs),y
            rts
-
-shrinkler_decrunch
-           ldx #.hi(buffers+$500)
-           lda #1
-           sta _d3
-           lsr @
-           sta _d3+1
-           sta _tabs
-           tay
-@          stx _tabs+1
-@          sta (_tabs),y
-           iny
-           bne @-
-           sta _lit     ; eventually $80
-           eor #$80
-           dex
-           cpx #.hi(buffers)
-           bcs @-1
-
-literal    inc _tabs    ; #1
-getlit     jsr getbit
-           rol _tabs
-           bcc getlit
-
-           lda _tabs
-           sta (_dst),y
-           inc _dst
-           bne @+
-           inc _dst+1
-@          jsr getkind
-           bcc literal
-
-           lda #.hi(probs_ref)
-           jsr getprob
-           bcc readoffset
-
-readlength
-           lda #.hi(probs_length)
-           jsr getnumber
-           lda #$ff
-_offsetL   equ *-1
-           adc _dst ; C=0
-           sta _copy
-           lda #$ff
-_offsetH   equ *-1
-           adc _dst+1
-           sta _copy+1
-
-           ldx _number+1
-           beq _lcoplp
-_lcop      lda (_copy),y
-           sta (_dst),y
-           iny
-           bne _lcop
-           inc _copy+1
-           inc _dst+1
-           dex
-           bne _lcop
-
-_lcoplp    ldx _number
-           beq _lcopfin
-_lcopS     lda (_copy),y
-           sta (_dst),y
-           iny
-           dex
-           bne _lcopS
-           tya
-           clc
-           adc _dst
-           sta _dst
-           bcc @+
-           inc _dst+1
-@          ldy #$00
-
-_lcopfin   jsr getkind
-           bcc literal
-
-readoffset
-           lda #.hi(probs_offset)
-           jsr getnumber
-           lda #$03
-           sbc _number  ; C=0
-           sta _offsetL
-           tya
-           sbc _number+1
-           sta _offsetH
-           bcc readlength
-           rts                   ; koniec
 
              .align
 buffers      equ *
