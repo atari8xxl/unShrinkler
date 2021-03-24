@@ -101,7 +101,7 @@ readoffset
            sbc _number+1
            sta _offsetH
            bcc readlength
-           rts                   ; koniec
+           rts                   ; finish
 
 getnumber  sta _tabs+1
 _numberloop
@@ -125,7 +125,7 @@ _bitsloop  dec _tabs
 getkind    sty _tabs
            lda #.hi(probs)
 getprob    sta _tabs+1
-           bne getbit     ; zawsze
+           bne getbit     ; always
 
 readbit    asl _d3
            rol _d3+1
@@ -207,7 +207,7 @@ one
            lda _Cp+1
 
            sec
-           bcs _probret ; zawsze
+           bcs _probret ; always
 
 zero       sta _d2+1    ; c=1
            stx _d2
