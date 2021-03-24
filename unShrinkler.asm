@@ -1,20 +1,22 @@
-; Zero Page
+_src       equ unshrinkler_zp
+_dst       equ unshrinkler_zp+2
+_copy      equ unshrinkler_zp+4
+_tabs      equ unshrinkler_zp+4
+_number    equ unshrinkler_zp+6
+_Cp        equ unshrinkler_zp+8
+_d2        equ unshrinkler_zp+10
+_d3        equ unshrinkler_zp+12
+_lit       equ unshrinkler_zp+14
+_xH        equ unshrinkler_zp+15
 
-_src     .word packed_data_addr
-_dst     .word unpacked_addr
-_copy
-_tabs    .word $0000
-_number  .word $0000
-_Cp      .word $0000
-_d2      .word $0000
-_lit     .byte $00
-_xH      .byte $00
-_d3      .word $0000
+           ert [unshrinkler_data&$ff]!=0
+probs        equ unshrinkler_data
+probs_ref    equ unshrinkler_data+$200
+probs_length equ unshrinkler_data+$200
+probs_offset equ unshrinkler_data+$400
 
-; unSrinkler
-
-shrinkler_decrunch
-           ldx #.hi(buffers+$500)
+           org unshrinkler
+           ldx #.hi(unshrinkler_data+$500)
            lda #1
            sta _d3
            lsr @
@@ -28,7 +30,7 @@ shrinkler_decrunch
            sta _lit     ; eventually $80
            eor #$80
            dex
-           cpx #.hi(buffers)
+           cpx #.hi(unshrinkler_data)
            bcs @-1
 
 literal    inc _tabs    ; #1
@@ -221,23 +223,3 @@ _probret   sta _d3+1
            pla
            sta (_tabs),y
            rts
-
-             .align
-buffers      equ *
-probs        equ buffers
-probs_ref    equ buffers+$200
-probs_length equ buffers+$200
-probs_offset equ buffers+$400
-
-
-
-
-
-
-
-
-
-
-
-
-
