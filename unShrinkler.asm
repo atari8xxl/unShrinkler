@@ -1,6 +1,7 @@
 unshrinkler_src	equ	unshrinkler_zp
 unshrinkler_dst	equ	unshrinkler_zp+2
 unshrinkler_copy	equ	unshrinkler_zp+4
+unshrinkler_factor	equ	unshrinkler_zp+4
 unshrinkler_tabs	equ	unshrinkler_zp+6
 unshrinkler_number	equ	unshrinkler_zp+8
 unshrinkler_cp	equ	unshrinkler_zp+10
@@ -165,12 +166,12 @@ unshrinkler_getBit
 	lda	unshrinkler_d3+1
 	bpl	unshrinkler_readBit
 	lda	(unshrinkler_tabs),y
-	sta	unshrinkler_cp+1
+	sta	unshrinkler_factor+1
 	lsr	@
 	sta	unshrinkler_tmpH
 	inc	unshrinkler_tabs+1
 	lda	(unshrinkler_tabs),y
-	sta	unshrinkler_cp
+	sta	unshrinkler_factor
 	ror	@
 	lsr	unshrinkler_tmpH
 	ror	@
@@ -180,39 +181,38 @@ unshrinkler_getBit
 	ror	@
 	eor	#$ff
 	sec
-	adc	unshrinkler_cp
+	adc	unshrinkler_factor
 	sta	(unshrinkler_tabs),y
-	lda	unshrinkler_cp+1
+	lda	unshrinkler_factor+1
 	sbc	unshrinkler_tmpH
 	pha
 
 	txa	; #0
-	sta	unshrinkler_tmpH
+	sta	unshrinkler_cp+1
+	lsr	unshrinkler_factor+1
+	ror	unshrinkler_factor
 	ldx	#16
 unshrinkler_mulLoop
-	asl	@
-	rol	unshrinkler_tmpH
-	rol	unshrinkler_cp
-	rol	unshrinkler_cp+1
 	bcc	unshrinkler_mulNext
 	clc
 	adc	unshrinkler_d3
 	pha
-	lda	unshrinkler_tmpH
+	lda	unshrinkler_cp+1
 	adc	unshrinkler_d3+1
-	sta	unshrinkler_tmpH
+	sta	unshrinkler_cp+1
 	pla
-	bcc	unshrinkler_mulNext
-	inc	unshrinkler_cp
-	bne	unshrinkler_mulNext
-	inc	unshrinkler_cp+1
 unshrinkler_mulNext
+	ror	unshrinkler_cp+1
+	ror	@
+	ror	unshrinkler_factor+1
+	ror	unshrinkler_factor
 	dex
 	bne	unshrinkler_mulLoop
+	sta	unshrinkler_cp
 
-	lda	unshrinkler_d2
+	eor	#$ff
 	sec
-	sbc	unshrinkler_cp
+	adc	unshrinkler_d2
 	tax
 	lda	unshrinkler_d2+1
 	sbc	unshrinkler_cp+1
