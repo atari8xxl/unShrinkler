@@ -152,8 +152,7 @@ unshrinkler_readBit
 	rol	unshrinkler_d3+1
 	asl	unshrinkler_srcBits
 	bne	unshrinkler_gotBit
-	ldx	#0
-	lda	(unshrinkler_src,x)
+	lda	(unshrinkler_src,x)	; X=0
 	inc	unshrinkler_src
 	bne	unshrinkler_readSamePage
 	inc	unshrinkler_src+1
@@ -165,6 +164,7 @@ unshrinkler_gotBit
 	rol	unshrinkler_d2+1
 
 unshrinkler_getBit
+	ldx	#0
 	lda	unshrinkler_d3+1
 	bpl	unshrinkler_readBit
 	lda	(unshrinkler_tabs),y
@@ -189,7 +189,7 @@ unshrinkler_getBit
 	sbc	unshrinkler_tmpH
 	pha
 
-	lda	#0
+	txa	; #0
 	sta	unshrinkler_tmpH
 	ldx	#16
 unshrinkler_mulLoop
