@@ -16,6 +16,7 @@ unshrinkler_probsLength	equ	unshrinkler_data+$200
 unshrinkler_probsOffset	equ	unshrinkler_data+$400
 
 	org	unshrinkler
+
 	ldx	#>[unshrinkler_data+$500]
 	lda	#1
 	sta	unshrinkler_d3
@@ -104,7 +105,7 @@ unshrinkler_copyDone
 unshrinkler_readOffset
 	lda	#>unshrinkler_probsOffset
 	jsr	unshrinkler_getNumber
-	lda	#$03
+	lda	#3
 	sbc	unshrinkler_number	; C=0
 	sta	unshrinkler_offsetL
 	tya
@@ -122,7 +123,7 @@ unshrinkler_getNumberCount
 	bcs	unshrinkler_getNumberCount
 
 	sty	unshrinkler_number+1
-	lda	#$01
+	lda	#1
 	sta	unshrinkler_number
 
 unshrinkler_getNumberBit
@@ -135,7 +136,7 @@ unshrinkler_getNumberBit
 	rts
 
 unshrinkler_getKind
-	sty	unshrinkler_tabs
+	sty	unshrinkler_tabs	; #0
 	lda	#>unshrinkler_probs
 unshrinkler_getBitFrom
 	sta	unshrinkler_tabs+1
@@ -218,7 +219,7 @@ unshrinkler_mulNext
 	sbc	#0	; C=0
 	sta	(unshrinkler_tabs),y
 	pla
-	sbc	#$F0
+	sbc	#$f0
 	pha
 	lda	unshrinkler_cp
 	sta	unshrinkler_d3
