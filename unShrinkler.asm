@@ -16,22 +16,24 @@ probs_length	equ	unshrinkler_data+$200
 probs_offset	equ	unshrinkler_data+$400
 
 	org	unshrinkler
-	ldx	#.hi(unshrinkler_data+$500)
+	ldx	#>[unshrinkler_data+$500]
 	lda	#1
 	sta	_d3
 	lsr	@
 	sta	_d3+1
 	sta	_tabs
 	tay
-@	stx	_tabs+1
-@	sta	(_tabs),y
+unshrinkler_initPage
+	stx	_tabs+1
+unshrinkler_initByte
+	sta	(_tabs),y
 	iny
-	bne	@-
+	bne	unshrinkler_initByte
 	sta	_lit	; eventually $80
 	eor	#$80
 	dex
-	cpx	#.hi(unshrinkler_data)
-	bcs	@-1
+	cpx	#>unshrinkler_data
+	bcs	unshrinkler_initPage
 
 literal
 	inc	_tabs	; #1
@@ -43,17 +45,18 @@ getlit
 	lda	_tabs
 	sta	(_dst),y
 	inc	_dst
-	bne	@+
+	bne	unshrinkler_storeSamePage
 	inc	_dst+1
-@	jsr	getkind
+unshrinkler_storeSamePage
+	jsr	getkind
 	bcc	literal
 
-	lda	#.hi(probs_ref)
+	lda	#>probs_ref
 	jsr	getprob
 	bcc	readoffset
 
 readlength
-	lda	#.hi(probs_length)
+	lda	#>probs_length
 	jsr	getnumber
 	lda	#$ff
 _offsetL	equ	*-1
@@ -89,16 +92,17 @@ _lcopS
 	clc
 	adc	_dst
 	sta	_dst
-	bcc	@+
+	bcc	unshrinkler_copySamePage
 	inc	_dst+1
-@	ldy	#$00
+unshrinkler_copySamePage
+	ldy	#0
 
 _lcopfin
 	jsr	getkind
 	bcc	literal
 
 readoffset
-	lda	#.hi(probs_offset)
+	lda	#>probs_offset
 	jsr	getnumber
 	lda	#$03
 	sbc	_number	; C=0
@@ -132,7 +136,7 @@ _bitsloop
 
 getkind
 	sty	_tabs
-	lda	#.hi(probs)
+	lda	#>probs
 getprob
 	sta	_tabs+1
 	bne	getbit	; always
@@ -144,9 +148,10 @@ readbit
 	bne	_rbok
 	lda	(_src),y
 	inc	_src
-	bne	@+
+	bne	unshrinkler_readSamePage
 	inc	_src+1
-@	rol	@	; C=1
+unshrinkler_readSamePage
+	rol	@	; C=1
 	sta	_lit
 _rbok
 	rol	_d2
