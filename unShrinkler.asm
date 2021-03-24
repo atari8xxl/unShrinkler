@@ -16,10 +16,6 @@ unshrinkler_probsOffset	equ	unshrinkler_data+$400
 
 	org	unshrinkler
 
-	ift	[unshrinkler_data&$ff]!=0
-	lda	#<unshrinkler_data
-	sta	unshrinkler_tabs
-	eif
 	ldx	#>[unshrinkler_data+$500]
 	ldy	#1
 	sty	unshrinkler_d3
@@ -27,6 +23,9 @@ unshrinkler_probsOffset	equ	unshrinkler_data+$400
 	sty	unshrinkler_d3+1
 	ift	[unshrinkler_data&$ff]==0
 	sty	unshrinkler_tabs
+	els
+	lda	#<unshrinkler_data
+	sta	unshrinkler_tabs
 	eif
 	tya
 unshrinkler_initPage
@@ -40,7 +39,7 @@ unshrinkler_initByte
 	dex
 	cpx	#>unshrinkler_data
 	bcs	unshrinkler_initPage
-	tax
+	tax	; #0
 
 unshrinkler_literal
 	ldy	#1
@@ -51,7 +50,7 @@ unshrinkler_literalBit
 	tay
 	bcc	unshrinkler_literalBit
 
-	sta	(unshrinkler_dst,x)
+	sta	(unshrinkler_dst,x)	; X=0
 	inc	unshrinkler_dst
 	bne	unshrinkler_storeSamePage
 	inc	unshrinkler_dst+1
@@ -113,7 +112,7 @@ unshrinkler_readOffset
 	lda	#3
 	sbc	unshrinkler_number	; C=0
 	sta	unshrinkler_offsetL
-	tya
+	tya	; #0
 	sbc	unshrinkler_number+1
 	sta	unshrinkler_offsetH
 	bcc	unshrinkler_readLength
