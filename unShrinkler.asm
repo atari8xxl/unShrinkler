@@ -10,10 +10,10 @@ unshrinkler_srcBits	equ	unshrinkler_zp+14
 unshrinkler_tmpH	equ	unshrinkler_zp+15
 
 	ert	[unshrinkler_data&$ff]!=0
-probs	equ	unshrinkler_data
-probs_ref	equ	unshrinkler_data+$200
-probs_length	equ	unshrinkler_data+$200
-probs_offset	equ	unshrinkler_data+$400
+unshrinkler_probs	equ	unshrinkler_data
+unshrinkler_probsRef	equ	unshrinkler_data+$200
+unshrinkler_probsLength	equ	unshrinkler_data+$200
+unshrinkler_probsOffset	equ	unshrinkler_data+$400
 
 	org	unshrinkler
 	ldx	#>[unshrinkler_data+$500]
@@ -51,12 +51,12 @@ unshrinkler_storeSamePage
 	jsr	unshrinkler_getKind
 	bcc	unshrinkler_literal
 
-	lda	#>probs_ref
+	lda	#>unshrinkler_probsRef
 	jsr	unshrinkler_getBitFrom
 	bcc	unshrinkler_readOffset
 
 unshrinkler_readLength
-	lda	#>probs_length
+	lda	#>unshrinkler_probsLength
 	jsr	unshrinkler_getNumber
 	lda	#$ff
 unshrinkler_offsetL	equ	*-1
@@ -102,7 +102,7 @@ unshrinkler_copyDone
 	bcc	unshrinkler_literal
 
 unshrinkler_readOffset
-	lda	#>probs_offset
+	lda	#>unshrinkler_probsOffset
 	jsr	unshrinkler_getNumber
 	lda	#$03
 	sbc	unshrinkler_number	; C=0
@@ -136,7 +136,7 @@ unshrinkler_getNumberBit
 
 unshrinkler_getKind
 	sty	unshrinkler_tabs
-	lda	#>probs
+	lda	#>unshrinkler_probs
 unshrinkler_getBitFrom
 	sta	unshrinkler_tabs+1
 	bne	unshrinkler_getBit	; always
