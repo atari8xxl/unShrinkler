@@ -1,249 +1,250 @@
-unshrinkler_src	equ	unshrinkler_zp
-unshrinkler_dst	equ	unshrinkler_zp+2
-unshrinkler_copy	equ	unshrinkler_zp+4
-unshrinkler_factor	equ	unshrinkler_zp+4
-unshrinkler_tabs	equ	unshrinkler_zp+6
-unshrinkler_number	equ	unshrinkler_zp+8
-unshrinkler_cp	equ	unshrinkler_zp+10
-unshrinkler_d2	equ	unshrinkler_zp+12
-unshrinkler_d3	equ	unshrinkler_zp+14
-unshrinkler_srcBits	equ	unshrinkler_zp+16
-unshrinkler_tmpH	equ	unshrinkler_zp+17
+	opt	?+
+unshrinkler
 
-unshrinkler_probs	equ	unshrinkler_data
-unshrinkler_probsRef	equ	unshrinkler_data+$200
-unshrinkler_probsLength	equ	unshrinkler_data+$200
-unshrinkler_probsOffset	equ	unshrinkler_data+$400
+?src	equ	unshrinkler_zp
+?dst	equ	unshrinkler_zp+2
+?copy	equ	unshrinkler_zp+4
+?factor	equ	unshrinkler_zp+4
+?tabs	equ	unshrinkler_zp+6
+?number	equ	unshrinkler_zp+8
+?cp	equ	unshrinkler_zp+10
+?d2	equ	unshrinkler_zp+12
+?d3	equ	unshrinkler_zp+14
+?srcBits	equ	unshrinkler_zp+16
+?tmpH	equ	unshrinkler_zp+17
 
-	org	unshrinkler
+?probs	equ	unshrinkler_data
+?probsRef	equ	unshrinkler_data+$200
+?probsLength	equ	unshrinkler_data+$200
+?probsOffset	equ	unshrinkler_data+$400
 
 	ldx	#>[unshrinkler_data+$500]
 	ldy	#1
-	sty	unshrinkler_d3
+	sty	?d3
 	dey
-	sty	unshrinkler_d3+1
-	ift	[unshrinkler_data&$ff]==0
-	sty	unshrinkler_tabs
+	sty	?d3+1
+	ift	0==<unshrinkler_data
+	sty	?tabs
 	els
 	lda	#<unshrinkler_data
-	sta	unshrinkler_tabs
+	sta	?tabs
 	eif
 	tya
-unshrinkler_initPage
-	stx	unshrinkler_tabs+1
-unshrinkler_initByte
-	sta	(unshrinkler_tabs),y
+?initPage
+	stx	?tabs+1
+?initByte
+	sta	(?tabs),y
 	iny
-	bne	unshrinkler_initByte
-	sta	unshrinkler_srcBits	; eventually $80
+	bne	?initByte
+	sta	?srcBits	; eventually $80
 	eor	#$80
 	dex
 	cpx	#>unshrinkler_data
-	bcs	unshrinkler_initPage
+	bcs	?initPage
 	tax	; #0
 
-unshrinkler_literal
+?literal
 	ldy	#1
-unshrinkler_literalBit
-	jsr	unshrinkler_getBit
+?literalBit
+	jsr	?getBit
 	tya
 	rol	@
 	tay
-	bcc	unshrinkler_literalBit
+	bcc	?literalBit
 
-	sta	(unshrinkler_dst,x)	; X=0
-	inc	unshrinkler_dst
-	bne	unshrinkler_storeSamePage
-	inc	unshrinkler_dst+1
-unshrinkler_storeSamePage
-	jsr	unshrinkler_getKind
-	bcc	unshrinkler_literal
+	sta	(?dst,x)	; X=0
+	inc	?dst
+	bne	?storeSamePage
+	inc	?dst+1
+?storeSamePage
+	jsr	?getKind
+	bcc	?literal
 
-	lda	#>unshrinkler_probsRef
-	jsr	unshrinkler_getBitFrom
-	bcc	unshrinkler_readOffset
+	lda	#>?probsRef
+	jsr	?getBitFrom
+	bcc	?readOffset
 
-unshrinkler_readLength
-	lda	#>unshrinkler_probsLength
-	jsr	unshrinkler_getNumber
+?readLength
+	lda	#>?probsLength
+	jsr	?getNumber
 	lda	#$ff
-unshrinkler_offsetL	equ	*-1
-	adc	unshrinkler_dst	; C=0
-	sta	unshrinkler_copy
+?offsetL	equ	*-1
+	adc	?dst	; C=0
+	sta	?copy
 	lda	#$ff
-unshrinkler_offsetH	equ	*-1
-	adc	unshrinkler_dst+1
-	sta	unshrinkler_copy+1
+?offsetH	equ	*-1
+	adc	?dst+1
+	sta	?copy+1
 
-	ldx	unshrinkler_number+1
-	beq	unshrinkler_copyRemainder
-unshrinkler_copyPage
-	lda	(unshrinkler_copy),y
-	sta	(unshrinkler_dst),y
+	ldx	?number+1
+	beq	?copyRemainder
+?copyPage
+	lda	(?copy),y
+	sta	(?dst),y
 	iny
-	bne	unshrinkler_copyPage
-	inc	unshrinkler_copy+1
-	inc	unshrinkler_dst+1
+	bne	?copyPage
+	inc	?copy+1
+	inc	?dst+1
 	dex
-	bne	unshrinkler_copyPage
+	bne	?copyPage
 
-unshrinkler_copyRemainder
-	ldx	unshrinkler_number
-	beq	unshrinkler_copyDone
-unshrinkler_copyByte
-	lda	(unshrinkler_copy),y
-	sta	(unshrinkler_dst),y
+?copyRemainder
+	ldx	?number
+	beq	?copyDone
+?copyByte
+	lda	(?copy),y
+	sta	(?dst),y
 	iny
 	dex
-	bne	unshrinkler_copyByte
+	bne	?copyByte
 	tya
 	clc
-	adc	unshrinkler_dst
-	sta	unshrinkler_dst
-	bcc	unshrinkler_copyDone
-	inc	unshrinkler_dst+1
+	adc	?dst
+	sta	?dst
+	bcc	?copyDone
+	inc	?dst+1
 
-unshrinkler_copyDone
-	jsr	unshrinkler_getKind
-	bcc	unshrinkler_literal
+?copyDone
+	jsr	?getKind
+	bcc	?literal
 
-unshrinkler_readOffset
-	lda	#>unshrinkler_probsOffset
-	jsr	unshrinkler_getNumber
+?readOffset
+	lda	#>?probsOffset
+	jsr	?getNumber
 	lda	#3
-	sbc	unshrinkler_number	; C=0
-	sta	unshrinkler_offsetL
+	sbc	?number	; C=0
+	sta	?offsetL
 	tya	; #0
-	sbc	unshrinkler_number+1
-	sta	unshrinkler_offsetH
-	bcc	unshrinkler_readLength
+	sbc	?number+1
+	sta	?offsetH
+	bcc	?readLength
 	rts	; finish
 
-unshrinkler_getNumber
-	sta	unshrinkler_tabs+1
+?getNumber
+	sta	?tabs+1
 	lda	#1
-	sta	unshrinkler_number
-	sty	unshrinkler_number+1	; #0
-unshrinkler_getNumberCount
+	sta	?number
+	sty	?number+1	; #0
+?getNumberCount
 	iny
 	iny
-	jsr	unshrinkler_getBit
-	bcs	unshrinkler_getNumberCount
+	jsr	?getBit
+	bcs	?getNumberCount
 
-unshrinkler_getNumberBit
+?getNumberBit
 	dey
-	jsr	unshrinkler_getBit
-	rol	unshrinkler_number
-	rol	unshrinkler_number+1
+	jsr	?getBit
+	rol	?number
+	rol	?number+1
 	dey
-	bne	unshrinkler_getNumberBit
+	bne	?getNumberBit
 	rts
 
-unshrinkler_getKind
+?getKind
 	ldy	#0
-	lda	#>unshrinkler_probs
-unshrinkler_getBitFrom
-	sta	unshrinkler_tabs+1
-	bne	unshrinkler_getBit	; always
+	lda	#>?probs
+?getBitFrom
+	sta	?tabs+1
+	bne	?getBit	; always
 
-unshrinkler_readBit
-	asl	unshrinkler_d3
-	rol	unshrinkler_d3+1
-	asl	unshrinkler_srcBits
-	bne	unshrinkler_gotBit
-	lda	(unshrinkler_src,x)	; X=0
-	inc	unshrinkler_src
-	bne	unshrinkler_readSamePage
-	inc	unshrinkler_src+1
-unshrinkler_readSamePage
+?readBit
+	asl	?d3
+	rol	?d3+1
+	asl	?srcBits
+	bne	?gotBit
+	lda	(?src,x)	; X=0
+	inc	?src
+	bne	?readSamePage
+	inc	?src+1
+?readSamePage
 	rol	@	; C=1
-	sta	unshrinkler_srcBits
-unshrinkler_gotBit
-	rol	unshrinkler_d2
-	rol	unshrinkler_d2+1
+	sta	?srcBits
+?gotBit
+	rol	?d2
+	rol	?d2+1
 
-unshrinkler_getBit
-	lda	unshrinkler_d3+1
-	bpl	unshrinkler_readBit
-	lda	(unshrinkler_tabs),y
-	sta	unshrinkler_factor+1
+?getBit
+	lda	?d3+1
+	bpl	?readBit
+	lda	(?tabs),y
+	sta	?factor+1
 	lsr	@
-	sta	unshrinkler_tmpH
-	inc	unshrinkler_tabs+1
-	lda	(unshrinkler_tabs),y
-	sta	unshrinkler_factor
+	sta	?tmpH
+	inc	?tabs+1
+	lda	(?tabs),y
+	sta	?factor
 	ror	@
-	lsr	unshrinkler_tmpH
+	lsr	?tmpH
 	ror	@
-	lsr	unshrinkler_tmpH
+	lsr	?tmpH
 	ror	@
-	lsr	unshrinkler_tmpH
+	lsr	?tmpH
 	ror	@
 	eor	#$ff
 	sec
-	adc	unshrinkler_factor
-	sta	(unshrinkler_tabs),y
-	lda	unshrinkler_factor+1
-	sbc	unshrinkler_tmpH
+	adc	?factor
+	sta	(?tabs),y
+	lda	?factor+1
+	sbc	?tmpH
 	pha
 
 	txa	; #0
-	sta	unshrinkler_cp+1
-	lsr	unshrinkler_factor+1
-	ror	unshrinkler_factor
+	sta	?cp+1
+	lsr	?factor+1
+	ror	?factor
 	ldx	#16
-unshrinkler_mulLoop
-	bcc	unshrinkler_mulNext
+?mulLoop
+	bcc	?mulNext
 	clc
-	adc	unshrinkler_d3
+	adc	?d3
 	pha
-	lda	unshrinkler_cp+1
-	adc	unshrinkler_d3+1
-	sta	unshrinkler_cp+1
+	lda	?cp+1
+	adc	?d3+1
+	sta	?cp+1
 	pla
-unshrinkler_mulNext
-	ror	unshrinkler_cp+1
+?mulNext
+	ror	?cp+1
 	ror	@
-	ror	unshrinkler_factor+1
-	ror	unshrinkler_factor
+	ror	?factor+1
+	ror	?factor
 	dex
-	bne	unshrinkler_mulLoop
-	sta	unshrinkler_cp
+	bne	?mulLoop
+	sta	?cp
 
 	eor	#$ff
 	sec
-	adc	unshrinkler_d2
+	adc	?d2
 	tax
-	lda	unshrinkler_d2+1
-	sbc	unshrinkler_cp+1
-	bcs	unshrinkler_zero
+	lda	?d2+1
+	sbc	?cp+1
+	bcs	?zero
 
-	lda	(unshrinkler_tabs),y
+	lda	(?tabs),y
 	sbc	#0	; C=0
-	sta	(unshrinkler_tabs),y
+	sta	(?tabs),y
 	pla
 	sbc	#$f0
 	pha
-	lda	unshrinkler_cp
-	sta	unshrinkler_d3
-	lda	unshrinkler_cp+1
+	lda	?cp
+	sta	?d3
+	lda	?cp+1
 	sec
-	bcs	unshrinkler_retBit	; always
+	bcs	?retBit	; always
 
-unshrinkler_zero
-	stx	unshrinkler_d2
-	sta	unshrinkler_d2+1
-	lda	unshrinkler_d3
-	sbc	unshrinkler_cp	; C=1
-	sta	unshrinkler_d3
-	lda	unshrinkler_d3+1
-	sbc	unshrinkler_cp+1
+?zero
+	stx	?d2
+	sta	?d2+1
+	lda	?d3
+	sbc	?cp	; C=1
+	sta	?d3
+	lda	?d3+1
+	sbc	?cp+1
 	clc
 
-unshrinkler_retBit
-	sta	unshrinkler_d3+1
-	dec	unshrinkler_tabs+1
+?retBit
+	sta	?d3+1
+	dec	?tabs+1
 	pla
-	sta	(unshrinkler_tabs),y
+	sta	(?tabs),y
 	ldx	#0
 	rts
