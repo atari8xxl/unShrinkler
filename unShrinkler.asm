@@ -190,10 +190,10 @@ unshrinkler
 
 	txa	; #0
 	sta	?cp+1
-	lsr	?factor+1
-	ror	?factor
 	ldx	#16
 ?mulLoop
+	ror	?factor+1
+	ror	?factor
 	bcc	?mulNext
 	clc
 	adc	?d3
@@ -205,8 +205,6 @@ unshrinkler
 ?mulNext
 	ror	?cp+1
 	ror	@
-	ror	?factor+1
-	ror	?factor
 	dex
 	bne	?mulLoop
 	sta	?cp
