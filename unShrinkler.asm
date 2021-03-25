@@ -10,8 +10,8 @@ unshrinkler
 ?cp	equ	unshrinkler_zp+10
 ?d2	equ	unshrinkler_zp+12
 ?d3	equ	unshrinkler_zp+14
-?srcBits	equ	unshrinkler_zp+16
-?tmpH	equ	unshrinkler_zp+17
+?frac	equ	unshrinkler_zp+16
+?srcBits	equ	unshrinkler_zp+18
 
 ?probs	equ	unshrinkler_data
 ?probsRef	equ	unshrinkler_data+$200
@@ -169,24 +169,18 @@ unshrinkler
 	lda	(?tabs),y
 	sta	?factor+1
 	lsr	@
-	sta	?tmpH
+	sta	?frac+1
 	inc	?tabs+1
 	lda	(?tabs),y
 	sta	?factor
 	ror	@
-	lsr	?tmpH
+	lsr	?frac+1
 	ror	@
-	lsr	?tmpH
+	lsr	?frac+1
 	ror	@
-	lsr	?tmpH
+	lsr	?frac+1
 	ror	@
-	eor	#$ff
-	sec
-	adc	?factor
-	sta	(?tabs),y
-	lda	?factor+1
-	sbc	?tmpH
-	pha
+	sta	?frac
 
 	txa	; #0
 	sta	?cp+1
@@ -217,17 +211,10 @@ unshrinkler
 	sbc	?cp+1
 	bcs	?zero
 
-	lda	(?tabs),y
-	sbc	#0	; C=0
-	sta	(?tabs),y
-	pla
-	sbc	#$f0
-	pha
 	lda	?cp
 	sta	?d3
 	lda	?cp+1
-	sec
-	bcs	?retBit	; always
+	bcc	?setD3	; always
 
 ?zero
 	stx	?d2
@@ -237,12 +224,23 @@ unshrinkler
 	sta	?d3
 	lda	?d3+1
 	sbc	?cp+1
-	clc
 
-?retBit
+?setD3
 	sta	?d3+1
+	php
+	lda	(?tabs),y
+	sbc	?frac
+	sta	(?tabs),y
 	dec	?tabs+1
-	pla
+	lda	(?tabs),y
+	sbc	?frac+1
+	plp
+	bcs	?retZero
+	sbc	#$ef	; C=0
+	sec
+	dta	{bit 0}
+?retZero
+	clc
 	sta	(?tabs),y
 	ldx	#0
 	rts
