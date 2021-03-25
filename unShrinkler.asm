@@ -174,7 +174,6 @@ unshrinkler
 
 	txa	; #0
 	sta	?cp+1
-	ldx	#16
 ?mulLoop
 	lsr	?factor+1
 	ror	?factor
@@ -189,21 +188,21 @@ unshrinkler
 ?mulNext
 	ror	?cp+1
 	ror	@
-	cpx	#13
+	inx
+	cpx	#4
 	bne	?notFrac
 	ldx	?factor
 	stx	?frac
 	ldx	?factor+1
 	stx	?frac+1
-	ldx	#13
+	ldx	#4
 ?notFrac
-	dex
-	bne	?mulLoop
+	cpx	#16
+	bcc	?mulLoop
 	sta	?cp
 
 	eor	#$ff
-	sec
-	adc	?d2
+	adc	?d2	; C=1
 	tax
 	lda	?d2+1
 	sbc	?cp+1
