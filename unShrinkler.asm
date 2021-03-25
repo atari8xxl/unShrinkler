@@ -208,8 +208,7 @@ unshrinkler
 	sbc	?cp+1
 	bcs	?zero
 
-	lda	?cp
-	sta	?d3
+	ldx	?cp
 	lda	?cp+1
 	bcc	?setD3	; always
 
@@ -218,11 +217,12 @@ unshrinkler
 	sta	?d2+1
 	lda	?d3
 	sbc	?cp	; C=1
-	sta	?d3
+	tax
 	lda	?d3+1
 	sbc	?cp+1
 
 ?setD3
+	stx	?d3
 	sta	?d3+1
 	php
 	lda	(?tabs),y
