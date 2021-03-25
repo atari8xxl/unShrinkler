@@ -168,25 +168,15 @@ unshrinkler
 	bpl	?readBit
 	lda	(?tabs),y
 	sta	?factor+1
-	lsr	@
-	sta	?frac+1
 	inc	?tabs+1
 	lda	(?tabs),y
 	sta	?factor
-	ror	@
-	lsr	?frac+1
-	ror	@
-	lsr	?frac+1
-	ror	@
-	lsr	?frac+1
-	ror	@
-	sta	?frac
 
 	txa	; #0
 	sta	?cp+1
 	ldx	#16
 ?mulLoop
-	ror	?factor+1
+	lsr	?factor+1
 	ror	?factor
 	bcc	?mulNext
 	clc
@@ -199,6 +189,14 @@ unshrinkler
 ?mulNext
 	ror	?cp+1
 	ror	@
+	cpx	#13
+	bne	?notFrac
+	ldx	?factor
+	stx	?frac
+	ldx	?factor+1
+	stx	?frac+1
+	ldx	#13
+?notFrac
 	dex
 	bne	?mulLoop
 	sta	?cp
