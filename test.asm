@@ -1,7 +1,8 @@
+unshrinkler_PARITY	equ	0
 unshrinkler_data	equ	$3000
 unshrinkler_zp	equ	$80
 
-	org	$3600
+	org	$3800
 main
 	mwa	#dl	$230
 	mwa	#packed_data_addr	unshrinkler_zp
@@ -11,7 +12,11 @@ main
 	icl	'unShrinkler.asm'
 
 packed_data_addr
+	ift	unshrinkler_PARITY
+	ins	'conan.srp'
+	els
 	ins	'conan.srk'
+	eif
 
 	org	$4000
 dl

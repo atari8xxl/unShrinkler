@@ -14,11 +14,11 @@ unshrinkler
 ?srcBits	equ	unshrinkler_zp+18
 
 ?probs	equ	unshrinkler_data
-?probsRef	equ	unshrinkler_data+$200
-?probsLength	equ	unshrinkler_data+$200
-?probsOffset	equ	unshrinkler_data+$400
+?probsRef	equ	unshrinkler_data+$200+$200*unshrinkler_PARITY
+?probsLength	equ	?probsRef
+?probsOffset	equ	?probsRef+$200
 
-	ldx	#>[unshrinkler_data+$500]
+	ldx	#>[?probsOffset+$100]
 	ldy	#1
 	sty	?d3
 	dey
@@ -142,7 +142,14 @@ unshrinkler
 
 ?getKind
 	ldy	#0
+	ift	unshrinkler_PARITY
+	lda	?dst
+	and	#1
+	asl	@
+	adc	#>?probs
+	els
 	lda	#>?probs
+	eif
 ?getBitFrom
 	sta	?tabs+1
 	bne	?getBit	; always
