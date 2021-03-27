@@ -26,6 +26,9 @@ Three memory areas are used:
 You must select these locations at compile time.
 `unshrinkler` is defined at the current origin.
 
+[unShrinkler.asm](unShrinkler.asm) uses `opt ?+`. If you use '?'-prefixed
+labels in MADS, you might want to follow the include with `opt ?-`.
+
 Usage
 -----
 
@@ -60,7 +63,7 @@ Use as follows:
 
     Shrinkler -d -p -9 INPUT_FILE OUTPUT_FILE
 
-The original compresser is available at https://github.com/askeksa/Shrinkler
+The original compressor is available at https://github.com/askeksa/Shrinkler
 
 License
 -------
