@@ -29,36 +29,27 @@ unshrinkler
 ?sqrZeroHi	equ	?probsOffset+$600
 	eif
 
-	ldx	#>[?probsOffset+$100]
-	ldy	#1
-	sty	?d3
-	dey
-	sty	?d3+1
+	ldx	>?probsOffset+$100
+	mwy	#1	?d3
 	ift	0==<unshrinkler_data
 	sty	?tabs
 	els
-	lda	#<unshrinkler_data
-	sta	?tabs
+	mva	<unshrinkler_data	?tabs
 	eif
 	tya
 ?initPage
 	stx	?tabs+1
-?initByte
-	sta	(?tabs),y
-	iny
-	bne	?initByte
+	sta:rne	(?tabs),y+
 	sta	?srcBits	; eventually $80
 	eor	#$80
 	dex
-	cpx	#>unshrinkler_data
+	cpx	>unshrinkler_data
 	bcs	?initPage
 	tax	; #0
 
 	ift	unshrinkler_FAST
-	lda	#>?sqrZeroLo
-	sta	?mal+1
-	lda	#>?sqrZerohi
-	sta	?mah+1
+	mva	>?sqrZeroLo	?mal+1
+	mva	>?sqrZerohi	?mah+1
 	stx	?sqrZeroLo
 	stx	?sqrZeroHi
 	ldy	#$ff
@@ -91,14 +82,12 @@ unshrinkler
 ?literal
 	ift	unshrinkler_FAST
 
-	lda	#1
-	sta	?tabs
+	mva	#1	?tabs
 ?literalBit
 	jsr	?getBit
 	rol	?tabs
 	bcc	?literalBit
-	lda	?tabs
-	sta	(?dst),y	; Y=0
+	mva	?tabs	(?dst),y	; Y=0
 	els
 
 	ldy	#1
@@ -111,19 +100,16 @@ unshrinkler
 	sta	(?dst,x)	; X=0
 	eif
 
-	inc	?dst
-	bne	?storeSamePage
-	inc	?dst+1
-?storeSamePage
+	inw	?dst
 	jsr	?getKind
 	bcc	?literal
 
-	lda	#>?probsRef
+	lda	>?probsRef
 	jsr	?getBitFrom
 	bcc	?readOffset
 
 ?readLength
-	lda	#>?probsLength
+	lda	>?probsLength
 	jsr	?getNumber
 	lda	#$ff
 ?offsetL	equ	*-1
@@ -137,10 +123,7 @@ unshrinkler
 	ldx	?number+1
 	beq	?copyRemainder
 ?copyPage
-	lda	(?copy),y
-	sta	(?dst),y
-	iny
-	bne	?copyPage
+	mva:rne	(?copy),y	(?dst),y+
 	inc	?copy+1
 	inc	?dst+1
 	dex
@@ -150,24 +133,20 @@ unshrinkler
 	ldx	?number
 	beq	?copyDone
 ?copyByte
-	lda	(?copy),y
-	sta	(?dst),y
-	iny
+	mva	(?copy),y	(?dst),y+
 	dex
 	bne	?copyByte
 	tya
-	clc
-	adc	?dst
+	add	?dst
 	sta	?dst
-	bcc	?copyDone
-	inc	?dst+1
+	scc:inc	?dst+1
 
 ?copyDone
 	jsr	?getKind
 	bcc	?literal
 
 ?readOffset
-	lda	#>?probsOffset
+	lda	>?probsOffset
 	jsr	?getNumber
 	lda	#3
 	sbc	?number	; C=0
@@ -180,8 +159,7 @@ unshrinkler
 
 ?getNumber
 	sta	?tabs+1
-	lda	#1
-	sta	?number
+	mva	#1	?number
 	sty	?number+1	; #0
 :unshrinkler_FAST	sty	?tabs
 ?getNumberCount
@@ -208,9 +186,9 @@ unshrinkler
 	lda	?dst
 	and	#1
 	asl	@
-	adc	#>?probs
+	adc	>?probs
 	els
-	lda	#>?probs
+	lda	>?probs
 	eif
 ?getBitFrom
 	sta	?tabs+1
@@ -223,10 +201,7 @@ unshrinkler
 	bne	?gotBit
 :unshrinkler_FAST	lda	(?src),y	; Y=0
 :!unshrinkler_FAST	lda	(?src,x)	; X=0
-	inc	?src
-	bne	?readSamePage
-	inc	?src+1
-?readSamePage
+	inw	?src
 	rol	@	; C=1
 	sta	?srcBits
 ?gotBit
@@ -237,8 +212,7 @@ unshrinkler
 	lda	?d3+1
 	bpl	?readBit
 
-	lda	(?tabs),y
-	sta	?factor+1
+	mva	(?tabs),y	?factor+1
 :unshrinkler_FAST	lsr	@
 	sta	?frac+1
 	inc	?tabs+1
@@ -271,46 +245,32 @@ unshrinkler
 	sbc	(?msl),y
 	sta	?cp+1
 ; result byte 2
-	lda	#0
-	tax
+	lda:tax	#0
 	adc	(?mah),y
-	bcc	?mulNoCarry1
-	inx
-?mulNoCarry1
+	scc:inx
 	plp
 	sbc	(?msh),y
-	bcs	?mulNoBorrow1
-	dex
-?mulNoBorrow1
+	scs:dex
 	sta	?cp
 ; result byte 1
 	lda	?factor+1
 	jsr	?setupMul
 	ldy	?d3
 	lda	?cp+1
-	clc
-	adc	(?mal),y
+	add	(?mal),y
 	php
 	cmp	(?msl),y
 ; result byte 2
 	lda	?cp
 	adc	(?mah),y
-	bcc	?mulNoCarry2
-	inx
-?mulNoCarry2
+	scc:inx
 	plp
 	sbc	(?msh),y
-	bcs	?mulNoBorrow2
-	dex
-?mulNoBorrow2
+	scs:dex
 	ldy	?d3+1
-	clc
-	adc	(?mal),y
-	bcc	?mulNoCarry3
-	inx
-?mulNoCarry3
-	sec
-	sbc	(?msl),y
+	add	(?mal),y
+	scc:inx
+	sub	(?msl),y
 	sta	?cp
 ; result byte 3
 	txa
@@ -341,8 +301,7 @@ unshrinkler
 	lsr	?factor+1
 	ror	?factor
 	bcc	?mulNext
-	clc
-	adc	?d3
+	add	?d3
 	pha
 	lda	?cp+1
 	adc	?d3+1
@@ -405,14 +364,13 @@ unshrinkler
 	sta	?mal
 	sta	?mah
 	eor	#$ff
-	clc
-	adc	#1
+	add	#1
 	sta	?msl
 	sta	?msh
 	lda	#0
-	adc	#>[?sqrZeroLo-$100]
+	adc	>?sqrZeroLo-$100
 	sta	?msl+1
-	adc	#>[?sqrZeroHi-?sqrZeroLo]
+	adc	>?sqrZeroHi-?sqrZeroLo
 	sta	?msh+1
 	rts
 	eif
