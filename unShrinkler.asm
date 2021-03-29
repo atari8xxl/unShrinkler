@@ -245,13 +245,11 @@ unshrinkler
 	sbc	(?msl),y
 	sta	?cp+1
 ; result byte 2
-	lda:tax	#0
+	lda	#0
 	adc	(?mah),y
-	scc:inx
 	plp
 	sbc	(?msh),y
-	scs:dex
-	sta	?cp
+	tax
 ; result byte 1
 	lda	?factor+1
 	jsr	?setupMul
@@ -261,7 +259,8 @@ unshrinkler
 	php
 	cmp	(?msl),y
 ; result byte 2
-	lda	?cp
+	txa
+	ldx	#0
 	adc	(?mah),y
 	scc:inx
 	plp
