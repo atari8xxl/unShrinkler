@@ -12,11 +12,22 @@ unshrinkler
 ?d3	equ	unshrinkler_zp+14
 ?frac	equ	unshrinkler_zp+16
 ?srcBits	equ	unshrinkler_zp+18
+	ift	unshrinkler_FAST
+?mal	equ	unshrinkler_zp+19
+?msl	equ	unshrinkler_zp+21
+?mah	equ	unshrinkler_zp+23
+?msh	equ	unshrinkler_zp+25
+	eif
 
 ?probs	equ	unshrinkler_data
 ?probsRef	equ	unshrinkler_data+$200+$200*unshrinkler_PARITY
 ?probsLength	equ	?probsRef
 ?probsOffset	equ	?probsRef+$200
+	ift	unshrinkler_FAST
+	ert	0!=<unshrinkler_data
+?sqrZeroLo	equ	?probsOffset+$300
+?sqrZeroHi	equ	?probsOffset+$600
+	eif
 
 	ldx	#>[?probsOffset+$100]
 	ldy	#1
@@ -42,6 +53,41 @@ unshrinkler
 	cpx	#>unshrinkler_data
 	bcs	?initPage
 	tax	; #0
+
+	ift	unshrinkler_FAST
+	lda	#>?sqrZeroLo
+	sta	?mal+1
+	lda	#>?sqrZerohi
+	sta	?mah+1
+	stx	?sqrZeroLo
+	stx	?sqrZeroHi
+	ldy	#$ff
+?initSqr1
+	txa
+	lsr	@
+	adc	?sqrZeroLo,x
+	sta	?sqrZeroLo+1,x
+	sta	?sqrZeroLo-$100,y
+	lda	#0
+	adc	?sqrZeroHi,x
+	sta	?sqrZeroHi+1,x
+	sta	?sqrZeroHi-$100,y
+	inx
+	dey
+	bne	?initSqr1
+?initSqr2
+	tya
+	sbc	#0	; C=0
+	ror	@
+	adc	?sqrZeroLo+$ff,y
+	sta	?sqrZeroLo+$100,y
+	lda	#0
+	adc	?sqrZeroHi+$ff,y
+	sta	?sqrZeroHi+$100,y
+	iny
+	bne	?initSqr2
+	inx
+	eif
 
 ?literal
 	ldy	#1
@@ -173,11 +219,98 @@ unshrinkler
 ?getBit
 	lda	?d3+1
 	bpl	?readBit
+
 	lda	(?tabs),y
 	sta	?factor+1
+	ift	unshrinkler_FAST
+	lsr	@
+	eif
 	sta	?frac+1
 	inc	?tabs+1
 	lda	(?tabs),y
+
+	ift	unshrinkler_FAST
+; fast multiplication
+	ror	@
+	lsr	?frac+1
+	ror	@
+	lsr	?frac+1
+	ror	@
+	lsr	?frac+1
+	ror	@
+	sta	?frac
+	sty	?factor
+
+	lda	(?tabs),y
+	jsr	?setupMul
+; result byte 0
+	ldy	?d3
+	lda	(?mal),y
+	cmp	(?msl),y
+; result byte 1
+	lda	(?mah),y
+	sbc	(?msh),y
+	ldy	?d3+1
+	adc	(?mal),y	; C=1
+	php
+	clc
+	sbc	(?msl),y
+	sta	?cp+1
+; result byte 2
+	lda	#0
+	tax
+	adc	(?mah),y
+	bcc	?mulNoCarry1
+	inx
+?mulNoCarry1
+	plp
+	sbc	(?msh),y
+	bcs	?mulNoBorrow1
+	dex
+?mulNoBorrow1
+	sta	?cp
+; result byte 1
+	lda	?factor+1
+	jsr	?setupMul
+	ldy	?d3
+	lda	?cp+1
+	clc
+	adc	(?mal),y
+	php
+	cmp	(?msl),y
+; result byte 2
+	lda	?cp
+	adc	(?mah),y
+	bcc	?mulNoCarry2
+	inx
+?mulNoCarry2
+	plp
+	sbc	(?msh),y
+	bcs	?mulNoBorrow2
+	dex
+?mulNoBorrow2
+	ldy	?d3+1
+	clc
+	adc	(?mal),y
+	bcc	?mulNoCarry3
+	inx
+?mulNoCarry3
+	sec
+	sbc	(?msl),y
+	sta	?cp
+; result byte 3
+	txa
+	adc	(?mah),y
+	clc
+	sbc	(?msh),y
+	sta	?cp+1
+
+	ldy	?factor
+	lda	?d2
+	sbc	?cp	; C=1
+
+	els
+; slow multiplication
 	sta	?factor
 	ldx	#4
 ?computeFrac
@@ -211,6 +344,9 @@ unshrinkler
 	eor	#$ff
 	sec
 	adc	?d2
+
+	eif
+
 	tax
 	lda	?d2+1
 	sbc	?cp+1
@@ -249,3 +385,20 @@ unshrinkler
 	sta	(?tabs),y
 	ldx	#0
 	rts
+
+	ift	unshrinkler_FAST
+?setupMul
+	sta	?mal
+	sta	?mah
+	eor	#$ff
+	clc
+	adc	#1
+	sta	?msl
+	sta	?msh
+	lda	#0
+	adc	#>[?sqrZeroLo-$100]
+	sta	?msl+1
+	adc	#>[?sqrZeroHi-?sqrZeroLo]
+	sta	?msh+1
+	rts
+	eif
