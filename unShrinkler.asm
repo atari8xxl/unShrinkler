@@ -86,10 +86,21 @@ unshrinkler
 	sta	?sqrZeroHi+$100,y
 	iny
 	bne	?initSqr2
-	inx
 	eif
 
 ?literal
+	ift	unshrinkler_FAST
+
+	lda	#1
+	sta	?tabs
+?literalBit
+	jsr	?getBit
+	rol	?tabs
+	bcc	?literalBit
+	lda	?tabs
+	sta	(?dst),y	; Y=0
+	els
+
 	ldy	#1
 ?literalBit
 	jsr	?getBit
@@ -97,8 +108,9 @@ unshrinkler
 	rol	@
 	tay
 	bcc	?literalBit
-
 	sta	(?dst,x)	; X=0
+	eif
+
 	inc	?dst
 	bne	?storeSamePage
 	inc	?dst+1
@@ -171,23 +183,27 @@ unshrinkler
 	lda	#1
 	sta	?number
 	sty	?number+1	; #0
+:unshrinkler_FAST	sty	?tabs
 ?getNumberCount
-	iny
-	iny
+:2*unshrinkler_FAST	inc	?tabs
+:2*!unshrinkler_FAST	iny
 	jsr	?getBit
 	bcs	?getNumberCount
 
 ?getNumberBit
-	dey
+:unshrinkler_FAST	dec	?tabs
+:!unshrinkler_FAST	dey
 	jsr	?getBit
 	rol	?number
 	rol	?number+1
-	dey
+:unshrinkler_FAST	dec	?tabs
+:!unshrinkler_FAST	dey
 	bne	?getNumberBit
 	rts
 
 ?getKind
 	ldy	#0
+:unshrinkler_FAST	sty	?tabs
 	ift	unshrinkler_PARITY
 	lda	?dst
 	and	#1
@@ -205,7 +221,8 @@ unshrinkler
 	rol	?d3+1
 	asl	?srcBits
 	bne	?gotBit
-	lda	(?src,x)	; X=0
+:unshrinkler_FAST	lda	(?src),y	; Y=0
+:!unshrinkler_FAST	lda	(?src,x)	; X=0
 	inc	?src
 	bne	?readSamePage
 	inc	?src+1
@@ -222,9 +239,7 @@ unshrinkler
 
 	lda	(?tabs),y
 	sta	?factor+1
-	ift	unshrinkler_FAST
-	lsr	@
-	eif
+:unshrinkler_FAST	lsr	@
 	sta	?frac+1
 	inc	?tabs+1
 	lda	(?tabs),y
@@ -239,7 +254,6 @@ unshrinkler
 	lsr	?frac+1
 	ror	@
 	sta	?frac
-	sty	?factor
 
 	lda	(?tabs),y
 	jsr	?setupMul
@@ -305,7 +319,7 @@ unshrinkler
 	sbc	(?msh),y
 	sta	?cp+1
 
-	ldy	?factor
+	ldy	#0
 	lda	?d2
 	sbc	?cp	; C=1
 
@@ -383,7 +397,7 @@ unshrinkler
 ?retZero
 	clc
 	sta	(?tabs),y
-	ldx	#0
+:!unshrinkler_FAST	ldx	#0
 	rts
 
 	ift	unshrinkler_FAST
