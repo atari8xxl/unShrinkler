@@ -16,6 +16,7 @@ main
 	ldx	19
 	jmp	*
 	icl	'unShrinkler.asm'
+code_len	equ	*-unshrinkler
 
 packed_data_addr
 	ift	unshrinkler_PARITY
