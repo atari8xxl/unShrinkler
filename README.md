@@ -15,16 +15,28 @@ The routine is compiled conditionally to support one of two Shrinkler variants:
   is almost sure to perform better with the data you have on an 8-bit machine
 * `unshrinkler_PARITY=1` is the original variant for Amiga
 
+The routine is slow. `unshrinkler_FAST=1` makes it about twice faster
+at the cost of increased memory usage.
+
 Three memory areas are used:
 
-* `unshrinkler` - code (about 320 bytes)
-* `unshrinkler_data` - uninitialized data (1.5 KB for "no parity context",
-  2 KB for the original variant; any address is ok, but aligned on page
-  boundary gives best performance and saves two bytes of code)
-* `unshrinkler_zp` - zero-page variables (19 bytes)
+* `unshrinkler` - code
+* `unshrinkler_data` - uninitialized data
+* `unshrinkler_zp` - zero-page variables
 
 You must select these locations at compile time.
 `unshrinkler` is defined at the current origin.
+
+| Options                                   | Code  | Uninitialized data   | Page zero |
+| ----------------------------------------- | -----:| --------------------:| ---------:|
+| `unshrinkler_PARITY=0 unshrinkler_FAST=0` | 318 B |               1.5 KB |      19 B |
+| `unshrinkler_PARITY=0 unshrinkler_FAST=1` | 469 B |               3.0 KB |      27 B |
+| `unshrinkler_PARITY=1 unshrinkler_FAST=0` | 323 B |               2.0 KB |      19 B |
+| `unshrinkler_PARITY=1 unshrinkler_FAST=1` | 474 B |               3.5 KB |      27 B |
+
+`unshrinkler_FAST=1` requires `unshrinkler_data` to be aligned on page boundary.
+With `unshrinkler_FAST=0` it can be unaligned, at the cost of two extra code bytes
+and slightly degraded performance.
 
 [unShrinkler.asm](unShrinkler.asm) uses `opt ?+`. If you use '?'-prefixed
 labels in MADS, you might want to follow the include with `opt ?-`.
