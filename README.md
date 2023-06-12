@@ -68,14 +68,13 @@ See [test.asm](test.asm) for an example for Atari 8-bit.
 Compression
 -----------
 
-Download the "no parity context" compressor from
-https://www.cpcwiki.eu/forum/programming/modified-shrinkler-without-parity-context
+Download the compressor from https://github.com/askeksa/Shrinkler
 
 Use as follows:
 
-    Shrinkler -d -p -9 INPUT_FILE OUTPUT_FILE
+    Shrinkler -d -p -9 -b INPUT_FILE OUTPUT_FILE
 
-The original compressor is available at https://github.com/askeksa/Shrinkler
+Include `-b` for `unshrinkler_PARITY=0`, omit it for `unshrinkler_PARITY=1`.
 
 License
 -------
