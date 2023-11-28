@@ -29,10 +29,10 @@ You must select these locations at compile time.
 
 | Options                                   | Code  | Uninitialized data   | Page zero |
 | ----------------------------------------- | -----:| --------------------:| ---------:|
-| `unshrinkler_PARITY=0 unshrinkler_FAST=0` | 318 B |               1.5 KB |      19 B |
-| `unshrinkler_PARITY=0 unshrinkler_FAST=1` | 469 B |               3.0 KB |      27 B |
-| `unshrinkler_PARITY=1 unshrinkler_FAST=0` | 323 B |               2.0 KB |      19 B |
-| `unshrinkler_PARITY=1 unshrinkler_FAST=1` | 474 B |               3.5 KB |      27 B |
+| `unshrinkler_PARITY=0 unshrinkler_FAST=0` | 320 B |               1.5 KB |      19 B |
+| `unshrinkler_PARITY=0 unshrinkler_FAST=1` | 471 B |               3.0 KB |      27 B |
+| `unshrinkler_PARITY=1 unshrinkler_FAST=0` | 325 B |               2.0 KB |      19 B |
+| `unshrinkler_PARITY=1 unshrinkler_FAST=1` | 476 B |               3.5 KB |      27 B |
 
 `unshrinkler_FAST=1` requires `unshrinkler_data` to be aligned on page boundary.
 With `unshrinkler_FAST=0` it can be unaligned, at the cost of two extra code bytes
