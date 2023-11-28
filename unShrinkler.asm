@@ -31,6 +31,7 @@ unshrinkler
 
 	ldx	>?probsOffset+$100
 	mwy	#1	?d3
+	sty	?d2
 	ift	0==<unshrinkler_data
 	sty	?tabs
 	els
